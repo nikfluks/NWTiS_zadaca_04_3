@@ -1,0 +1,163 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>        
+        <ui:composition template="./predlozak.xhtml">
+            <ui:define name="naslov">
+                NWTiS - Pregled parkirališta i prognoza vremena
+            </ui:define>
+
+            <ui:define name="top">
+                NWTiS - Pregled parkirališta i prognoza vremena
+            </ui:define>
+
+            <ui:define name="content">
+                <h:form>
+                    <h:panelGrid columns="3">
+                        <h:outputLabel class="pregledLabeleZaglavlje" for="id" value="Id"/>
+                        <h:inputText id="id" value="#{pregled.id}" disabled="#{pregled.prikaziGumbUpisi}"/>
+                        <h:commandButton class="sveGumbovi" value="Dodaj" action="#{pregled.dodajParkiraliste()}">
+                            <f:ajax execute="id naziv adresa" render="id naziv adresa popisPostojecihParkiralista greska upisi" />
+                        </h:commandButton>
+
+                        <h:outputLabel class="pregledLabeleZaglavlje" for="naziv" value="Naziv"/>
+                        <h:inputText id="naziv" value="#{pregled.naziv}"/>
+                        <h:outputText value="" rendered="true"/>
+
+                        <h:outputLabel class="pregledLabeleZaglavlje" for="adresa" value="Adresa"/>
+                        <h:inputText id="adresa" value="#{pregled.adresa}"/>
+                        <h:panelGroup id="upisi">
+                            <h:commandButton  class="sveGumbovi" value="Upiši" 
+                                              action="#{pregled.upisiParkiraliste()}" 
+                                              rendered="#{pregled.prikaziGumbUpisi}">
+                                <f:ajax execute="id naziv adresa" 
+                                        render="id naziv adresa popisPostojecihParkiralista greska upisi azuriraj" />
+                            </h:commandButton>
+                        </h:panelGroup>
+                    </h:panelGrid>
+
+                    <h:messages id="greska" styleClass="sveGreske"/>
+
+                    <h:panelGrid columns="4" class="pregledPodaci">
+                        <h:panelGrid>
+                            <h:outputLabel for="popisPostojecihParkiralista" value="Postojeća parkirališta:"/>
+                            <h:selectManyListbox id="popisPostojecihParkiralista" size="8" 
+                                                 value="#{pregled.listaOdabranihParkiralista}" >
+                                <f:selectItems value="#{pregled.popisPostojecihParkiralista}" var="p" 
+                                               itemLabel="#{p.labela}" itemValue="#{p.vrijednost}" />
+                                <f:ajax event="click" listener="#{pregled.provjeriGumbAzuriraj()}" 
+                                        execute="popisPostojecihParkiralista" render="azuriraj"/>
+                            </h:selectManyListbox>
+                        </h:panelGrid>
+                        <h:panelGrid>                            
+                            <h:commandButton class="sveGumbovi pregledGumboviPoRedovima pregledGumbPrviURedu" 
+                                             value="Preuzmi" action="#{pregled.preuzmiParkiralista()}">
+                                <f:ajax execute="popisPostojecihParkiralista" 
+                                        render="popisOdabranihParkiralista popisPostojecihParkiralista azuriraj prognoze" />
+                            </h:commandButton>
+                            <h:commandButton class="sveGumbovi pregledGumboviPoRedovima" 
+                                             value="Vrati" action="#{pregled.vratiParkiralista()}">
+                                <f:ajax execute="popisOdabranihParkiralista" 
+                                        render="popisOdabranihParkiralista popisPostojecihParkiralista azuriraj prognoze" />
+                            </h:commandButton>
+                            <h:panelGroup id="azuriraj" style="visibility:#{(pregled.prikaziGumbAzuriraj)?'visible':'hidden'}">
+                                <h:commandButton class="sveGumbovi pregledGumboviPoRedovima" 
+                                                 value="Ažuriraj" action="#{pregled.azurirajParkiralista()}">
+                                    <f:ajax execute="popisPostojecihParkiralista" 
+                                            render="id naziv adresa popisPostojecihParkiralista upisi" />
+                                </h:commandButton>
+                            </h:panelGroup> 
+                        </h:panelGrid>
+                        <h:panelGrid>
+                            <h:outputLabel for="popisOdabranihParkiralista" value="Odabrana parkirališta:"/>
+                            <h:selectManyListbox id="popisOdabranihParkiralista" size="8"
+                                                 value="#{pregled.listaOdabranihParkiralistaZaVracanje}" >
+                                <f:selectItems value="#{pregled.popisOdabranihParkiralista}" var="p" 
+                                               itemLabel="#{p.labela}" itemValue="#{p.vrijednost}" />
+                            </h:selectManyListbox>
+                        </h:panelGrid>
+                        <h:panelGrid>
+                            <h:panelGroup id="prognoze">
+                                <h:commandButton class="sveGumbovi pregledGumbPrognoze" 
+                                                 value='#{pregled.gumbPrognozeNaziv}' 
+                                                 action="#{pregled.preuzmiPrognoze()}"
+                                                 rendered="#{pregled.prikaziGumbPrognoze}">
+                                    <f:ajax execute="prognoze" render="meteoPodaci meteoPodaciTabica prognoze" />
+                                </h:commandButton>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+                    <h:panelGroup id="meteoPodaci" layout="block" class="sveTabliceScroll" 
+                                  style="display:#{(pregled.prikaziPrognoze)?'block':'none'}">
+                        <h:dataTable id="meteoPodaciTabica" 
+                                     value="#{pregled.popisParkiralistaIMeteoPodataka}" 
+                                     var="pip"
+                                     styleClass="sveTablice"
+                                     headerClass="sveTabliceZaglavlje"
+                                     rowClasses="sveTabliceNeparni,sveTabliceParni"
+                                     cellpadding="5px"
+                                     columnClasses=",,,pregledTablicaPrognoza">
+                            <h:column>
+                                <f:facet name="header">Id</f:facet>
+                                    #{pip.idParkiralista}
+                            </h:column>                            
+                            <h:column>
+                                <f:facet name="header">Naziv</f:facet>
+                                    #{pip.nazivParkiralista}
+                            </h:column>                            
+                            <h:column>
+                                <f:facet name="header">Adresa</f:facet>
+                                    #{pip.adresaParkiralista}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Prognoza za</f:facet>
+                                <h:outputText value="#{pip.datum}">
+                                </h:outputText>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Vrijeme</f:facet>
+                                    #{pip.meteoPodaci.cloudsName}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Vrijeme opis</f:facet>
+                                    #{pip.meteoPodaci.weatherValue}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Temperatura min</f:facet>
+                                #{pip.meteoPodaci.temperatureMin}#{pip.meteoPodaci.temperatureUnit}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Temperatura</f:facet>
+                                #{pip.meteoPodaci.temperatureValue}#{pip.meteoPodaci.temperatureUnit}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Temperatura max</f:facet>
+                                #{pip.meteoPodaci.temperatureMax}#{pip.meteoPodaci.temperatureUnit}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Tlak</f:facet>
+                                #{pip.meteoPodaci.pressureValue}#{pip.meteoPodaci.pressureUnit}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Vlaga</f:facet>
+                                #{pip.meteoPodaci.humidityValue}#{pip.meteoPodaci.humidityUnit}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Vjetar</f:facet>
+                                #{pip.meteoPodaci.windSpeedValue}m/s
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Vjetar smjer</f:facet>
+                                #{pip.meteoPodaci.windDirectionValue}°
+                            </h:column>
+                        </h:dataTable>
+                    </h:panelGroup>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

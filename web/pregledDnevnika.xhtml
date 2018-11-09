@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+    <body>
+        <ui:composition template="./predlozak.xhtml">
+            <ui:define name="naslov">
+                NWTiS - Pregled dnevnika
+            </ui:define>
+
+            <ui:define name="top">
+                NWTiS - Pregled dnevnika
+            </ui:define>
+
+            <ui:define name="content">
+                <h:form>
+                    <h:panelGrid columns="3">
+                        <h:outputLabel class="dnevnikLabeleZaglavlje" for="ipAdresa" value="IP adresa"/>
+                        <h:inputText id="ipAdresa" value="#{dp.ipAdresa}" a:placeholder="x:x:x:x:x:x:x:x"/>
+                        <h:outputText value="" rendered="true"/>
+
+                        <h:outputLabel class="dnevnikLabeleZaglavlje" for="odDatum" value="Od"/>
+                        <h:inputText id="odDatum" value="#{dp.odDatum}" a:placeholder="dd.MM.yyyy HH:mm"/>
+                        <h:outputText value="" rendered="true"/>
+
+                        <h:outputLabel class="dnevnikLabeleZaglavlje" for="doDatum" value="Do"/>
+                        <h:inputText id="doDatum" value="#{dp.doDatum}" a:placeholder="dd.MM.yyyy HH:mm"/>
+                        <h:outputText value="" rendered="true"/>
+
+                        <h:outputLabel class="dnevnikLabeleZaglavlje" for="urlAdresa" value="Adresa zahtjeva"/>
+                        <h:inputText id="urlAdresa" value="#{dp.urlAdresa}" a:placeholder="http://server:port/putanja"/>
+                        <h:outputText value="" rendered="true"/>
+
+                        <h:outputLabel class="dnevnikLabeleZaglavlje" for="trajanje" value="Trajanje"/>
+                        <h:inputText id="trajanje" value="#{dp.trajanje}" a:placeholder="broj ms"/>
+                        <h:commandButton class="sveGumbovi" value="Preuzmi" action="#{dp.preuzmiPodatke()}">
+                            <f:ajax execute="ipAdresa odDatum doDatum urlAdresa trajanje" render="dnevnikPodaci dnevnikPodaciTablica greska" />
+                        </h:commandButton>
+                    </h:panelGrid>
+
+                    <h:messages id="greska" styleClass="sveGreske"/>
+
+                    <h:panelGroup id="dnevnikPodaci" layout="block" class="sveTabliceScroll">
+                        <h:dataTable id="dnevnikPodaciTablica" 
+                                     value="#{dp.listaDnevnikaFormatirana}" 
+                                     var="df"
+                                     styleClass="sveTablice"
+                                     headerClass="sveTabliceZaglavlje"
+                                     rowClasses="sveTabliceNeparni,sveTabliceParni"
+                                     cellpadding="5px">
+                            <h:column>
+                                <f:facet name="header">Id</f:facet>
+                                    #{df.dnevnik.id}
+                            </h:column>                            
+                            <h:column>
+                                <f:facet name="header">Korisnik</f:facet>
+                                    #{df.dnevnik.korisnik}
+                            </h:column>                            
+                            <h:column>
+                                <f:facet name="header">Url adresa zahtjeva</f:facet>
+                                    #{df.dnevnik.url}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">IP adresa</f:facet>
+                                #{df.dnevnik.ipadresa}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Vrijeme</f:facet>
+                                    #{df.datum}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Trajanje</f:facet>
+                                    #{df.dnevnik.trajanje}ms
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Status</f:facet>
+                                    #{df.dnevnik.status}
+                            </h:column>
+                        </h:dataTable>
+                    </h:panelGroup> 
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
